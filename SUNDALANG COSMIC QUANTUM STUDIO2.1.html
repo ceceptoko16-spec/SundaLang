@@ -1,0 +1,2641 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUNDALANG COSMIC QUANTUM STUDIO</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --cosmic-primary: #0066ff;
+            --cosmic-secondary: #00ffcc;
+            --cosmic-accent: #ff00ff;
+            --cosmic-dark: #0a0a1a;
+            --cosmic-darker: #050510;
+            --cosmic-card: rgba(255, 255, 255, 0.05);
+            --cosmic-border: rgba(0, 255, 204, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.5);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: var(--cosmic-darker);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 102, 255, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 85% 30%, rgba(0, 255, 204, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 50% 80%, rgba(255, 0, 255, 0.1) 0%, transparent 20%);
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: rgba(10, 15, 30, 0.95);
+            border-right: 1px solid var(--cosmic-border);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--cosmic-border);
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--cosmic-primary), var(--cosmic-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .menu-item:hover {
+            background: rgba(0, 200, 255, 0.1);
+        }
+        
+        .menu-item.active {
+            background: rgba(0, 200, 255, 0.15);
+            border-left-color: var(--cosmic-accent);
+        }
+        
+        .menu-item i {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+            color: var(--cosmic-secondary);
+        }
+        
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid var(--cosmic-border);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .content-header {
+            margin-bottom: 30px;
+        }
+        
+        .content-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--cosmic-primary), var(--cosmic-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .content-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-card {
+            background: var(--cosmic-card);
+            border: 1px solid var(--cosmic-border);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.2);
+        }
+        
+        .dashboard-card h3 {
+            margin-bottom: 15px;
+            color: var(--cosmic-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* AI Assistant */
+        .ai-assistant {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+        
+        .ai-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cosmic-primary), var(--cosmic-accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 200, 255, 0.5);
+            transition: all 0.3s ease;
+            border: 2px solid var(--cosmic-secondary);
+        }
+        
+        .ai-avatar:hover {
+            transform: scale(1.1);
+        }
+        
+        .ai-chat-container {
+            position: absolute;
+            bottom: 90px;
+            right: 0;
+            width: 350px;
+            height: 450px;
+            background: rgba(10, 15, 30, 0.95);
+            border: 1px solid var(--cosmic-border);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        
+        .ai-chat-container.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+        
+        .chat-header {
+            padding: 15px;
+            background: rgba(0, 200, 255, 0.1);
+            border-bottom: 1px solid var(--cosmic-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chat-header h3 {
+            margin: 0;
+            color: var(--cosmic-secondary);
+        }
+        
+        .chat-messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        
+        .message.ai {
+            background: rgba(0, 200, 255, 0.15);
+            border-bottom-left-radius: 5px;
+            align-self: flex-start;
+        }
+        
+        .message.user {
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom-right-radius: 5px;
+            align-self: flex-end;
+        }
+        
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid var(--cosmic-border);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--cosmic-border);
+            border-radius: 20px;
+            padding: 10px 15px;
+            color: var(--text-primary);
+            outline: none;
+        }
+        
+        .chat-input button {
+            background: var(--cosmic-primary);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-input button:hover {
+            background: var(--cosmic-secondary);
+            transform: rotate(15deg);
+        }
+        
+        /* Control Grid */
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .quantum-panel {
+            background: var(--cosmic-card);
+            border: 1px solid var(--cosmic-border);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .quantum-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 204, 0.2);
+        }
+        
+        .quantum-panel h2 {
+            margin-bottom: 20px;
+            color: var(--cosmic-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--cosmic-primary), var(--cosmic-secondary));
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            width: 100%;
+            margin: 8px 0;
+            font-weight: bold;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 255, 204, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--cosmic-border);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* Quantum Visualization Canvas */
+        .quantum-viz {
+            width: 100%;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--cosmic-border);
+        }
+        
+        .visualization-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .visualization-controls .btn {
+            width: auto;
+            padding: 8px 15px;
+        }
+        
+        /* Quantum Circuit Display */
+        .circuit-display {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: monospace;
+            min-height: 60px;
+            border: 1px solid var(--cosmic-border);
+        }
+        
+        .qubit-line {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .qubit-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cosmic-primary), var(--cosmic-accent));
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        /* Code Editor */
+        .code-editor {
+            height: 300px;
+            border: 1px solid var(--cosmic-border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        
+        /* File List */
+        .file-list {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid var(--cosmic-border);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--cosmic-border);
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .file-action-btn {
+            background: none;
+            border: none;
+            color: var(--cosmic-secondary);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            height: 300px;
+            margin: 20px 0;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--cosmic-border);
+            }
+            
+            .sidebar-menu {
+                display: flex;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .menu-item {
+                flex-direction: column;
+                text-align: center;
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                border-left: none;
+                border-bottom: 4px solid transparent;
+            }
+            
+            .menu-item.active {
+                border-left-color: transparent;
+                border-bottom-color: var(--cosmic-accent);
+            }
+            
+            .dashboard-grid,
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .ai-chat-container {
+                width: 300px;
+                right: -20px;
+            }
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Status Bar */
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-top: 1px solid var(--cosmic-border);
+        }
+        
+        /* Bloch Sphere Canvas */
+        .bloch-canvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Android App Specific */
+        .android-only {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .android-only {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Menu -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>SundaLang Studio</h2>
+                <p>Platform Komputasi Quantum</p>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li class="menu-item active" data-tab="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </li>
+                <li class="menu-item" data-tab="quantum">
+                    <i class="fas fa-atom"></i>
+                    <span>Operasi Quantum</span>
+                </li>
+                <li class="menu-item" data-tab="ai-bridge">
+                    <i class="fas fa-brain"></i>
+                    <span>AI Bridge</span>
+                </li>
+                <li class="menu-item" data-tab="visualization">
+                    <i class="fas fa-project-diagram"></i>
+                    <span>Visualisasi</span>
+                </li>
+                <li class="menu-item" data-tab="ml">
+                    <i class="fas fa-robot"></i>
+                    <span>Machine Learning</span>
+                </li>
+                <li class="menu-item" data-tab="data">
+                    <i class="fas fa-database"></i>
+                    <span>Manajemen Data</span>
+                </li>
+                <li class="menu-item" data-tab="system">
+                    <i class="fas fa-microchip"></i>
+                    <span>Status Sistem</span>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer">
+                <p>Versi 2.1.0</p>
+                <p>Resonansi: 128Hz</p>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Tab -->
+            <div class="tab-content active" id="dashboard-tab">
+                <div class="content-header">
+                    <h1>Dashboard Komputasi Quantum</h1>
+                    <p>Pantau dan kendalikan lingkungan komputasi quantum Anda</p>
+                </div>
+                
+                <!-- Dashboard Overview -->
+                <div class="dashboard-grid">
+                    <div class="dashboard-card fade-in">
+                        <h3><i class="fas fa-microchip"></i> Prosesor Quantum</h3>
+                        <p>Status: <strong>Online</strong></p>
+                        <p>Qubit Tersedia: <strong id="qubit-count">5</strong></p>
+                        <p>Suhu: <strong>15mK</strong></p>
+                    </div>
+                    
+                    <div class="dashboard-card fade-in">
+                        <h3><i class="fas fa-brain"></i> Sistem AI</h3>
+                        <p>Status: <strong>Aktif</strong></p>
+                        <p>Model: <strong>Neuro-Galaktik v2.3</strong></p>
+                        <p>Akurasi: <strong>98.7%</strong></p>
+                    </div>
+                    
+                    <div class="dashboard-card fade-in">
+                        <h3><i class="fas fa-tachometer-alt"></i> Kinerja</h3>
+                        <p>Operasi: <strong id="ops-count">128</strong>/detik</p>
+                        <p>Koherensi: <strong id="coherence">95</strong>μs</p>
+                        <p>Fidelitas: <strong id="fidelity">99.2</strong>%</p>
+                    </div>
+                </div>
+                
+                <!-- Quantum Operations Panel -->
+                <div class="quantum-panel fade-in">
+                    <h2><i class="fas fa-circle-nodes"></i> Operasi Quantum Cepat</h2>
+                    
+                    <div class="control-grid">
+                        <div>
+                            <button class="btn" onclick="runQuantumOperation('entangle')">
+                                <i class="fas fa-link"></i> Buat Belitan Quantum
+                            </button>
+                            <button class="btn" onclick="runQuantumOperation('superposition')">
+                                <i class="fas fa-circle-notch"></i> Superposisi
+                            </button>
+                            <button class="btn" onclick="runQuantumOperation('h-gate')">
+                                <i class="fas fa-project-diagram"></i> Gerbang Hadamard
+                            </button>
+                        </div>
+                        <div>
+                            <button class="btn" onclick="runQuantumOperation('cnot')">
+                                <i class="fas fa-exchange-alt"></i> Gerbang CNOT
+                            </button>
+                            <button class="btn" onclick="runQuantumOperation('x-gate')">
+                                <i class="fas fa-times"></i> Gerbang Pauli-X
+                            </button>
+                            <button class="btn" onclick="runQuantumOperation('measure')">
+                                <i class="fas fa-ruler"></i> Pengukuran
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="circuit-display" id="circuit-display">
+                        <div class="qubit-line">
+                            <div class="qubit-circle">0</div>
+                            <span>|0⟩ ───</span>
+                        </div>
+                        <div class="qubit-line">
+                            <div class="qubit-circle">1</div>
+                            <span>|0⟩ ───</span>
+                        </div>
+                    </div>
+                    
+                    <div class="quantum-viz" id="quantum-visualization">
+                        <canvas id="bloch-canvas" class="bloch-canvas"></canvas>
+                    </div>
+                    
+                    <div class="visualization-controls">
+                        <button class="btn btn-secondary" onclick="resetVisualization()">
+                            <i class="fas fa-sync"></i> Reset
+                        </button>
+                        <button class="btn btn-secondary" onclick="runQuantumCircuit()">
+                            <i class="fas fa-play"></i> Jalankan Sirkuit
+                        </button>
+                        <button class="btn btn-secondary" onclick="addQubit()">
+                            <i class="fas fa-plus"></i> Tambah Qubit
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quantum Operations Tab -->
+            <div class="tab-content" id="quantum-tab">
+                <div class="content-header">
+                    <h1>Operasi Quantum</h1>
+                    <p>Jalankan operasi dan gerbang quantum pada qubit</p>
+                </div>
+                
+                <div class="control-grid">
+                    <div class="quantum-panel">
+                        <h2><i class="fas fa-circle-nodes"></i> Operasi Sirkuit Quantum</h2>
+                        <button class="btn" onclick="runQuantumCircuit()">
+                            <i class="fas fa-play"></i> Jalankan Sirkuit Quantum
+                        </button>
+                        <button class="btn" onclick="runQuantumOperation('entangle')">
+                            <i class="fas fa-link"></i> Buat Belitan Quantum
+                        </button>
+                        <button class="btn" onclick="runQuantumOperation('superposition')">
+                            <i class="fas fa-circle-notch"></i> Superposisi
+                        </button>
+                        <button class="btn" onclick="runQuantumOperation('interference')">
+                            <i class="fas fa-wave-square"></i> Interferensi Quantum
+                        </button>
+                    </div>
+                    
+                    <div class="quantum-panel">
+                        <h2><i class="fas fa-microchip"></i> Manajemen Qubit</h2>
+                        <div class="qubit-line">
+                            <div class="qubit-circle">0</div>
+                            <span>Qubit |0⟩ - Keadaan Dasar</span>
+                        </div>
+                        <div class="qubit-line">
+                            <div class="qubit-circle">1</div>
+                            <span>Qubit |1⟩ - Keadaan Terangkat</span>
+                        </div>
+                        <div class="qubit-line">
+                            <div class="qubit-circle pulse">+</div>
+                            <span>Keadaan Superposisi</span>
+                        </div>
+                        <button class="btn" onclick="addQubit()">
+                            <i class="fas fa-plus"></i> Tambah Qubit
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetQubits()">
+                            <i class="fas fa-sync"></i> Reset Qubit
+                        </button>
+                    </div>
+                    
+                    <div class="quantum-panel">
+                        <h2><i class="fas fa-door-open"></i> Gerbang Quantum</h2>
+                        <button class="btn" onclick="runQuantumOperation('h-gate')">
+                            <i class="fas fa-project-diagram"></i> Gerbang Hadamard (H)
+                        </button>
+                        <button class="btn" onclick="runQuantumOperation('x-gate')">
+                            <i class="fas fa-times"></i> Gerbang Pauli-X (X)
+                        </button>
+                        <button class="btn" onclick="runQuantumOperation('y-gate')">
+                            <i class="fas fa-times-circle"></i> Gerbang Pauli-Y (Y)
+                        </button>
+                        <button class="btn" onclick="runQuantumOperation('z-gate')">
+                            <i class="fas fa-compress-alt"></i> Gerbang Pauli-Z (Z)
+                        </button>
+                        <button class="btn" onclick="runQuantumOperation('cnot')">
+                            <i class="fas fa-exchange-alt"></i> Gerbang CNOT
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="quantum-panel">
+                    <h2><i class="fas fa-list"></i> Sirkuit Quantum</h2>
+                    <div class="circuit-display" id="quantum-circuit-display">
+                        <div class="qubit-line">
+                            <div class="qubit-circle">0</div>
+                            <span>|0⟩ ───</span>
+                        </div>
+                        <div class="qubit-line">
+                            <div class="qubit-circle">1</div>
+                            <span>|0⟩ ───</span>
+                        </div>
+                    </div>
+                    <div id="quantum-results"></div>
+                </div>
+            </div>
+            
+            <!-- AI Bridge Tab -->
+            <div class="tab-content" id="ai-bridge-tab">
+                <div class="content-header">
+                    <h1>AI Bridge</h1>
+                    <p>Terjemahkan bahasa natural menjadi kode quantum</p>
+                </div>
+                
+                <div class="control-grid">
+                    <div class="quantum-panel">
+                        <h2><i class="fas fa-language"></i> Instruksi Bahasa Alami</h2>
+                        <textarea class="input-area" id="input-instruction" placeholder="Contoh: Buatkan quantum circuit dengan 2 qubit, tambah gate Hadamard di qubit pertama, lalu CNOT antara qubit 0 dan 1" style="width: 100%; min-height: 150px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--cosmic-border); border-radius: 8px; color: var(--text-primary); padding: 1rem; font-family: 'Fira Code', monospace; resize: vertical; margin-bottom: 1rem;"></textarea>
+                        
+                        <button class="btn" onclick="generateCode()">
+                            <i class="fas fa-code"></i> Generate Kode
+                        </button>
+                        
+                        <div class="suggestions" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
+                            <div class="suggestion-chip" onclick="insertSuggestion('Buat quantum circuit dengan 3 qubit dan gate Hadamard di semua qubit')" style="background: rgba(0, 230, 204, 0.1); border: 1px solid rgba(0, 230, 204, 0.2); border-radius: 20px; padding: 0.5rem 1rem; cursor: pointer; transition: all 0.2s ease; font-size: 0.9rem;">Circuit Dasar</div>
+                            <div class="suggestion-chip" onclick="insertSuggestion('Buat quantum neural network untuk klasifikasi dengan 4 qubit')" style="background: rgba(0, 230, 204, 0.1); border: 1px solid rgba(0, 230, 204, 0.2); border-radius: 20px; padding: 0.5rem 1rem; cursor: pointer; transition: all 0.2s ease; font-size: 0.9rem;">Quantum ML</div>
+                            <div class="suggestion-chip" onclick="insertSuggestion('Simulasi molekul H2 dengan variational quantum eigensolver')" style="background: rgba(0, 230, 204, 0.1); border: 1px solid rgba(0, 230, 204, 0.2); border-radius: 20px; padding: 0.5rem 1rem; cursor: pointer; transition: all 0.2s ease; font-size: 0.9rem;">Quantum Chemistry</div>
+                        </div>
+                    </div>
+                    
+                    <div class="quantum-panel">
+                        <h2><i class="fas fa-code"></i> Kode SundaLang</h2>
+                        <div class="code-editor" id="code-output">
+                            // Kode SundaLang akan muncul di sini
+                            // Ketik instruksi di panel kiri dan klik "Generate Kode"
+                        </div>
+                        
+                        <div class="btn-group" style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                            <button class="btn btn-secondary" onclick="copyCode()">
+                                <i class="fas fa-copy"></i> Salin Kode
+                            </button>
+                            <button class="btn btn-secondary" onclick="downloadCode()">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                            <button class="btn" onclick="runCode()">
+                                <i class="fas fa-play"></i> Jalankan
+                            </button>
+                            <button class="btn btn-secondary" onclick="visualizeCircuit()">
+                                <i class="fas fa-project-diagram"></i> Visualisasi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AI Enhanced Features -->
+                <div class="quantum-panel">
+                    <h2><i class="fas fa-robot"></i> Fitur AI Tambahan</h2>
+                    <button class="btn" onclick="optimizeCircuit()">
+                        <i class="fas fa-tachometer-alt"></i> Optimasi Sirkuit
+                    </button>
+                    <button class="btn" onclick="suggestImprovements()">
+                        <i class="fas fa-lightbulb"></i> Saran Perbaikan
+                    </button>
+                    <button class="btn" onclick="explainConcept()">
+                        <i class="fas fa-question-circle"></i> Jelaskan Konsep
+                    </button>
+                    
+                    <div id="ai-suggestions" style="margin-top: 15px; padding: 15px; background: rgba(0, 0, 0, 0.1); border-radius: 10px; display: none;">
+                        <h3>Saran AI:</h3>
+                        <p id="suggestion-text"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Visualization Tab -->
+            <div class="tab-content" id="visualization-tab">
+                <div class="content-header">
+                    <h1>Visualisasi Quantum</h1>
+                    <p>Lihat representasi visual dari keadaan quantum</p>
+                </div>
+                
+                <div class="quantum-panel">
+                    <h2><i class="fas fa-project-diagram"></i> Visualisasi Sirkuit Quantum</h2>
+                    <div class="quantum-viz" id="circuit-viz">
+                        <canvas id="circuit-canvas" class="bloch-canvas"></canvas>
+                    </div>
+                    
+                    <div class="visualization-controls">
+                        <button class="btn btn-secondary" onclick="zoomIn()">
+                            <i class="fas fa-search-plus"></i> Zoom In
+                        </button>
+                        <button class="btn btn-secondary" onclick="zoomOut()">
+                            <i class="fas fa-search-minus"></i> Zoom Out
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetView()">
+                            <i class="fas fa-sync"></i> Reset
+                        </button>
+                        <button class="btn" onclick="exportVisualization()">
+                            <i class="fas fa-download"></i> Ekspor
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="quantum-panel">
+                    <h2><i class="fas fa-globe"></i> Visualisasi State Quantum</h2>
+                    <div class="quantum-viz" id="state-viz">
+                        <canvas id="state-canvas" class="bloch-canvas"></canvas>
+                    </div>
+                    
+                    <div class="visualization-controls">
+                        <button class="btn btn-secondary" onclick="visualizeState('zero')">
+                            <i class="fas fa-dot-circle"></i> Visualize |0⟩
+                        </button>
+                        <button class="btn btn-secondary" onclick="visualizeState('one')">
+                            <i class="fas fa-dot-circle"></i> Visualize |1⟩
+                        </button>
+                        <button class="btn btn-secondary" onclick="visualizeState('plus')">
+                            <i class="fas fa-plus-circle"></i> Visualize |+⟩
+                        </button>
+                        <button class="btn btn-secondary" onclick="visualizeState('minus')">
+                            <i class="fas fa-minus-circle"></i> Visualize |-⟩
+                        </button>
+                        <button class="btn" onclick="startAnimation()">
+                            <i class="fas fa-play"></i> Animasikan States
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 3D Visualization -->
+                <div class="quantum-panel">
+                    <h2><i class="fas fa-cube"></i> Visualisasi 3D State Quantum</h2>
+                    <div class="quantum-viz" id="3d-viz">
+                        <canvas id="3d-canvas" class="bloch-canvas"></canvas>
+                    </div>
+                    
+                    <div class="visualization-controls">
+                        <button class="btn btn-secondary" onclick="rotateX()">
+                            <i class="fas fa-sync"></i> Rotasi X
+                        </button>
+                        <button class="btn btn-secondary" onclick="rotateY()">
+                            <i class="fas fa-sync"></i> Rotasi Y
+                        </button>
+                        <button class="btn btn-secondary" onclick="rotateZ()">
+                            <i class="fas fa-sync"></i> Rotasi Z
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Machine Learning Tab -->
+            <div class="tab-content" id="ml-tab">
+                <div class="content-header">
+                    <h1>Machine Learning Quantum</h1>
+                    <p>Jalankan model machine learning berbasis quantum</p>
+                </div>
+                
+                <div class="control-grid">
+                    <div class="quantum-panel">
+                        <h2><i class="fas fa-brain"></i> Neural Network</h2>
+                        <button class="btn" onclick="runNeuralNetwork()">
+                            <i class="fas fa-play"></i> Jalankan Neural Network
+                        </button>
+                        <button class="btn" onclick="trainModel()">
+                            <i class="fas fa-graduation-cap"></i> Latih Model Quantum
+                        </button>
+                        <button class="btn" onclick="loadPretrainedModel()">
+                            <i class="fas fa-download"></i> Muat Model Pretrained
+                        </button>
+                    </div>
+                    
+                    <div class="quantum-panel">
+                        <h2><i class="fas fa-search"></i> Pengenalan Pola</h2>
+                        <button class="btn" onclick="runPatternRecognition()">
+                            <i class="fas fa-project-diagram"></i> Pengenalan Pola
+                        </button>
+                        <button class="btn" onclick="runImageRecognition()">
+                            <i class="fas fa-image"></i> Pengenalan Gambar
+                        </button>
+                        <button class="btn" onclick="runSpeechRecognition()">
+                            <i class="fas fa-microphone"></i> Pengenalan Suara
+                        </button>
+                    </div>
+                    
+                    <div class="quantum-panel">
+                        <h2><i class="fas fa-chart-line"></i> Analisis Prediktif</h2>
+                        <button class="btn" onclick="runPredictiveAnalysis()">
+                            <i class="fas fa-chart-line"></i> Analisis Prediktif
+                        </button>
+                        <button class="btn" onclick="runTimeSeries()">
+                            <i class="fas fa-clock"></i> Analisis Time Series
+                        </button>
+                        <button class="btn" onclick="runAnomalyDetection()">
+                            <i class="fas fa-exclamation-triangle"></i> Deteksi Anomali
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="quantum-panel">
+                    <h2><i class="fas fa-chart-bar"></i> Hasil Training</h2>
+                    <div class="chart-container">
+                        <canvas id="training-chart"></canvas>
+                    </div>
+                    
+                    <div id="training-results">
+                        <h3>Metrik Training:</h3>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px;">
+                            <div style="background: rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 8px;">
+                                <strong>Akurasi:</strong> <span id="accuracy">0%</span>
+                            </div>
+                            <div style="background: rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 8px;">
+                                <strong>Loss:</strong> <span id="loss">0</span>
+                            </div>
+                            <div style="background: rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 8px;">
+                                <strong>Epoch:</strong> <span id="epoch">0/50</span>
+                            </div>
+                            <div style="background: rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 8px;">
+                                <strong>Waktu:</strong> <span id="training-time">00:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Model Evaluation -->
+                <div class="quantum-panel">
+                    <h2><i class="fas fa-chart-line"></i> Evaluasi Model</h2>
+                    <div class="chart-container">
+                        <canvas id="evaluation-chart"></canvas>
+                    </div>
+                    
+                    <div class="visualization-controls">
+                        <button class="btn" onclick="evaluateModel()">
+                            <i class="fas fa-chart-bar"></i> Evaluasi Model
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportModel()">
+                            <i class="fas fa-download"></i> Ekspor Model
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Data Management Tab -->
+            <div class="tab-content" id="data-tab">
+                <div class="content-header">
+                    <h1>Manajemen Data Quantum</h1>
+                    <p>Kelola data dan hasil eksperimen quantum</p>
+                </div>
+                
+                <div class="control-grid">
+                    <div class="quantum-panel">
+                        <h2><i class="fas fa-database"></i> Manajemen Data</h2>
+                        <input type="file" id="data-upload" class="btn" style="background: rgba(255,255,255,0.1);" onchange="handleFileUpload(this.files)">
+                        <button class="btn" onclick="analyzeQuantumData()">
+                            <i class="fas fa-chart-bar"></i> Analisis Data Quantum
+                        </button>
+                        <button class="btn" onclick="saveToQuantumStorage()">
+                            <i class="fas fa-save"></i> Simpan ke Quantum Storage
+                        </button>
+                    </div>
+                    
+                    <div class="quantum-panel">
+                        <h2><i class="fas fa-info-circle"></i> Informasi Dataset</h2>
+                        <p>Total datasets: <span id="dataset-count">0</span></p>
+                        <p>Quantum storage: <span id="storage-size">0 MB</span></p>
+                        <p>File aktif: <span id="active-file">Tidak ada</span></p>
+                        <button class="btn btn-secondary" onclick="clearStorage()">
+                            <i class="fas fa-trash"></i> Bersihkan Storage
+                        </button>
+                    </div>
+                    
+                    <div class="quantum-panel">
+                        <h2><i class="fas fa-lock"></i> Enkripsi Data</h2>
+                        <button class="btn" onclick="encryptData()">
+                            <i class="fas fa-lock"></i> Enkripsi Quantum
+                        </button>
+                        <button class="btn" onclick="decryptData()">
+                            <i class="fas fa-unlock"></i> Dekripsi Quantum
+                        </button>
+                        <button class="btn" onclick="generateKeys()">
+                            <i class="fas fa-key"></i> Generate Kunci Quantum
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- File Browser -->
+                <div class="quantum-panel">
+                    <h2><i class="fas fa-folder-open"></i> Quantum Storage</h2>
+                    
+                    <div class="file-list" id="file-list">
+                        <p>Memuat daftar file...</p>
+                    </div>
+                    
+                    <div class="visualization-controls">
+                        <button class="btn" onclick="refreshFileList()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                        <button class="btn btn-secondary" onclick="loadFromQuantumStorage()">
+                            <i class="fas fa-folder-open"></i> Ambil dari Storage
+                        </button>
+                        <button class="btn btn-secondary" onclick="createNewDataset()">
+                            <i class="fas fa-plus"></i> Dataset Baru
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Data Visualization -->
+                <div class="quantum-panel">
+                    <h2><i class="fas fa-chart-area"></i> Visualisasi Data</h2>
+                    <div class="chart-container">
+                        <canvas id="data-chart"></canvas>
+                    </div>
+                    
+                    <div class="visualization-controls">
+                        <button class="btn" onclick="visualizeData()">
+                            <i class="fas fa-chart-bar"></i> Visualisasi Data
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportData()">
+                            <i class="fas fa-download"></i> Ekspor Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Status Tab -->
+            <div class="tab-content" id="system-tab">
+                <div class="content-header">
+                    <h1>Status Sistem</h1>
+                    <p>Pantau kesehatan dan kinerja sistem</p>
+                </div>
+                
+                <div class="quantum-panel">
+                    <h2><i class="fas fa-heart-pulse"></i> Status Sistem</h2>
+                    <div class="system-status" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+                        <div class="status-item" style="display: flex; flex-direction: column; padding: 15px; background: rgba(255, 255, 255, 0.03); border-radius: 10px;">
+                            <span class="status-label" style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7);">Quantum Core</span>
+                            <span class="status-value" id="core-status" style="font-size: 1.1rem; font-weight: bold; color: var(--cosmic-secondary);">Loading...</span>
+                        </div>
+                        <div class="status-item" style="display: flex; flex-direction: column; padding: 15px; background: rgba(255, 255, 255, 0.03); border-radius: 10px;">
+                            <span class="status-label" style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7);">AI Engine</span>
+                            <span class="status-value" id="ai-status" style="font-size: 1.1rem; font-weight: bold; color: var(--cosmic-secondary);">Loading...</span>
+                        </div>
+                        <div class="status-item" style="display: flex; flex-direction: column; padding: 15px; background: rgba(255, 255, 255, 0.03); border-radius: 10px;">
+                            <span class="status-label" style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7);">TensorFlow.js</span>
+                            <span class="status-value" id="tf-status" style="font-size: 1.1rem; font-weight: bold; color: var(--cosmic-secondary);">Checking...</span>
+                        </div>
+                        <div class="status-item" style="display: flex; flex-direction: column; padding: 15px; background: rgba(255, 255, 255, 0.03); border-radius: 10px;">
+                            <span class="status-label" style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7);">Resonance</span>
+                            <span class="status-value" id="resonance-status" style="font-size: 1.1rem; font-weight: bold; color: var(--cosmic-secondary);">128Hz</span>
+                        </div>
+                        <div class="status-item" style="display: flex; flex-direction: column; padding: 15px; background: rgba(255, 255, 255, 0.03); border-radius: 10px;">
+                            <span class="status-label" style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7);">Qubits Available</span>
+                            <span class="status-value" id="system-qubit-count" style="font-size: 1.1rem; font-weight: bold; color: var(--cosmic-secondary);">2</span>
+                        </div>
+                        <div class="status-item" style="display: flex; flex-direction: column; padding: 15px; background: rgba(255, 255, 255, 0.03); border-radius: 10px;">
+                            <span class="status-label" style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7);">System Load</span>
+                            <span class="status-value" id="system-load" style="font-size: 1.1rem; font-weight: bold; color: var(--cosmic-secondary);">0%</span>
+                        </div>
+                        <div class="status-item" style="display: flex; flex-direction: column; padding: 15px; background: rgba(255, 255, 255, 0.03); border-radius: 10px;">
+                            <span class="status-label" style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7);">WebAssembly</span>
+                            <span class="status-value" id="wasm-status" style="font-size: 1.1rem; font-weight: bold; color: var(--cosmic-secondary);">Checking...</span>
+                        </div>
+                        <div class="status-item" style="display: flex; flex-direction: column; padding: 15px; background: rgba(255, 255, 255, 0.03); border-radius: 10px;">
+                            <span class="status-label" style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7);">GPU Acceleration</span>
+                            <span class="status-value" id="gpu-status" style="font-size: 1.1rem; font-weight: bold; color: var(--cosmic-secondary);">Testing...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="quantum-panel">
+                    <h2><i class="fas fa-rocket"></i> Metrik Kinerja</h2>
+                    <div class="chart-container">
+                        <canvas id="performance-chart"></canvas>
+                    </div>
+                    
+                    <div id="performance-metrics" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                        <div style="background: rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 8px;">
+                            <strong>Memory Usage:</strong> <span id="memory-usage">-</span>
+                        </div>
+                        <div style="background: rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 8px;">
+                            <strong>Operations:</strong> <span id="op-count">0</span>
+                        </div>
+                        <div style="background: rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 8px;">
+                            <strong>Uptime:</strong> <span id="uptime">00:00:00</span>
+                        </div>
+                        <div style="background: rgba(0, 0, 0, 0.1); padding: 10px; border-radius: 8px;">
+                            <strong>Energy Level:</strong> <span id="energy-level">72%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Controls -->
+                <div class="quantum-panel">
+                    <h2><i class="fas fa-cogs"></i> Kontrol Sistem</h2>
+                    <div class="control-grid">
+                        <div>
+                            <button class="btn btn-secondary" onclick="optimizePerformance()">
+                                <i class="fas fa-tachometer-alt"></i> Optimasi Kinerja
+                            </button>
+                        </div>
+                        <div>
+                            <button class="btn btn-secondary" onclick="clearCache()">
+                                <i class="fas fa-broom"></i> Bersihkan Cache
+                            </button>
+                        </div>
+                        <div>
+                            <button class="btn btn-secondary" onclick="restartSystem()">
+                                <i class="fas fa-power-off"></i> Restart Sistem
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AI Assistant -->
+    <div class="ai-assistant">
+        <div class="ai-chat-container" id="ai-chat">
+            <div class="chat-header">
+                <i class="fas fa-robot"></i>
+                <h3>Asisten AI Quantum</h3>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message ai">
+                    Halo! Saya Asisten AI Quantum SundaLang. Ada yang bisa saya bantu tentang komputasi quantum hari ini?
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="Tanya sesuatu tentang quantum..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="ai-avatar" id="ai-avatar">
+            <i class="fas fa-robot"></i>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <span>Status Quantum: <span id="quantum-state">|0⟩</span></span>
+        <span>Resonansi: 128Hz</span>
+        <span>Level Energi: <span id="energy-level">72%</span></span>
+        <span>Status: <strong id="global-status">Sistem Siap</strong></span>
+    </div>
+
+    <script>
+        // ==================== KONFIGURASI UTAMA ====================
+        const SUNDALANG_CONFIG = {
+            version: "2.1.0",
+            quantum: {
+                maxQubits: 10,
+                availableGates: ['H', 'X', 'Y', 'Z', 'CNOT', 'SWAP', 'TOFFOLI']
+            },
+            storage: {
+                maxSize: 100, // MB
+                fileList: []
+            }
+        };
+        
+        // State variables
+        let quantumCircuit = [];
+        let qubits = 2;
+        let operationsCount = 0;
+        let startTime = Date.now();
+        let trainingChart, evaluationChart, performanceChart, dataChart;
+        let currentState = 'zero';
+        
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize menu functionality
+            initMenu();
+            
+            // Initialize AI assistant
+            initAIAssistant();
+            
+            // Initialize system status
+            updateSystemStatus();
+            
+            // Initialize visual effects
+            createParticles();
+            
+            // Initialize TensorFlow.js
+            initTensorFlow();
+            
+            // Initialize charts
+            initCharts();
+            
+            // Initialize visualization
+            initVisualization();
+            
+            // Load file list
+            refreshFileList();
+        });
+        
+        // Menu functionality
+        function initMenu() {
+            const menuItems = document.querySelectorAll('.menu-item');
+            
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Get the tab to show
+                    const tabName = this.getAttribute('data-tab');
+                    showTab(tabName);
+                });
+            });
+        }
+        
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+            
+            // Show the selected tab content
+            const selectedTab = document.getElementById(`${tabName}-tab`);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+            
+            // Update content header based on selected tab
+            const contentHeader = document.querySelector('.content-header');
+            const headerTitle = contentHeader.querySelector('h1');
+            const headerDesc = contentHeader.querySelector('p');
+            
+            switch(tabName) {
+                case 'dashboard':
+                    headerTitle.textContent = 'Dashboard Komputasi Quantum';
+                    headerDesc.textContent = 'Pantau dan kendalikan lingkungan komputasi quantum Anda';
+                    break;
+                case 'quantum':
+                    headerTitle.textContent = 'Operasi Quantum';
+                    headerDesc.textContent = 'Jalankan operasi dan gerbang quantum pada qubit';
+                    break;
+                case 'ai-bridge':
+                    headerTitle.textContent = 'AI Bridge';
+                    headerDesc.textContent = 'Terjemahkan bahasa natural menjadi kode quantum';
+                    break;
+                case 'visualization':
+                    headerTitle.textContent = 'Visualisasi Quantum';
+                    headerDesc.textContent = 'Lihat representasi visual dari keadaan quantum';
+                    updateVisualization();
+                    break;
+                case 'ml':
+                    headerTitle.textContent = 'Machine Learning Quantum';
+                    headerDesc.textContent = 'Jalankan model machine learning berbasis quantum';
+                    break;
+                case 'data':
+                    headerTitle.textContent = 'Manajemen Data Quantum';
+                    headerDesc.textContent = 'Kelola data dan hasil eksperimen quantum';
+                    break;
+                case 'system':
+                    headerTitle.textContent = 'Status Sistem';
+                    headerDesc.textContent = 'Pantau kesehatan dan kinerja sistem';
+                    break;
+            }
+        }
+        
+        // AI Assistant functionality
+        function initAIAssistant() {
+            const aiAvatar = document.getElementById('ai-avatar');
+            const aiChat = document.getElementById('ai-chat');
+            
+            aiAvatar.addEventListener('click', function() {
+                aiChat.classList.toggle('open');
+            });
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const chatMessages = document.getElementById('chat-messages');
+            
+            if (userInput.value.trim() === '') return;
+            
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.textContent = userInput.value;
+            chatMessages.appendChild(userMessage);
+            
+            // Simulate AI response
+            setTimeout(() => {
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'message ai';
+                aiMessage.textContent = generateAIResponse(userInput.value);
+                chatMessages.appendChild(aiMessage);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 1000);
+            
+            // Clear input
+            userInput.value = '';
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function generateAIResponse(input) {
+            input = input.toLowerCase();
+            
+            if (input.includes('halo') || input.includes('hai') || input.includes('hi')) {
+                return 'Halo! Senang bisa membantu Anda dengan komputasi quantum. Ada yang ingin Anda tanyakan?';
+            } else if (input.includes('belitan') || input.includes('entanglement')) {
+                return 'Belitan quantum adalah fenomena dimana dua atau lebih partikel terhubung sehingga keadaan satu partikel mempengaruhi keadaan partikel lainnya, meskipun terpisah jarak jauh.';
+            } else if (input.includes('superposisi')) {
+                return 'Superposisi quantum memungkinkan qubit berada dalam keadaan |0⟩ dan |1⟩ secara bersamaan sampai diukur. Ini adalah dasar keunggulan komputasi quantum.';
+            } else if (input.includes('qubit')) {
+                return 'Qubit adalah unit dasar informasi quantum. Berbeda dengan bit klasik yang hanya 0 atau 1, qubit bisa dalam superposisi kedua keadaan.';
+            } else if (input.includes('gerbang') || input.includes('gate')) {
+                return 'Gerbang quantum adalah operasi dasar pada qubit. Beberapa gerbang penting termasuk Hadamard (membuat superposisi), CNOT (membuat belitan), dan Pauli gates.';
+            } else if (input.includes('sundalang') || input.includes('sunda')) {
+                return 'SundaLang adalah platform komputasi quantum yang mengintegrasikan kebijaksanaan lokal dengan teknologi quantum tercanggih.';
+            } else if (input.includes('quantum') || input.includes('kuantum')) {
+                return 'Komputasi quantum menggunakan properti mekanika quantum seperti superposisi dan belitan untuk melakukan perhitungan yang lebih efisien daripada komputer klasik.';
+            } else if (input.includes('error') || input.includes('masalah') || input.includes('kendala')) {
+                return 'Jika mengalami kendala, coba reset sirkuit quantum atau kurangi jumlah qubit. Pastikan juga browser Anda mendukung WebGL untuk akselerasi GPU.';
+            } else {
+                // AI enhanced response with context awareness
+                const currentTab = document.querySelector('.menu-item.active').getAttribute('data-tab');
+                let contextResponses = [
+                    "Saya sedang menganalisis pertanyaan Anda tentang komputasi quantum...",
+                    "Pertanyaan yang menarik tentang mekanika quantum!",
+                    "Berdasarkan prinsip quantum, saya bisa menjelaskan bahwa...",
+                    "Mari kita eksplorasi konsep quantum tersebut bersama-sama.",
+                    "Dalam framework SundaLang, kami menerapkan pendekatan yang unik untuk hal itu."
+                ];
+                
+                // Add context-specific responses
+                if (currentTab === 'quantum') {
+                    contextResponses.push(
+                        "Berdasarkan operasi quantum yang sedang Anda jalankan, saya sarankan...",
+                        "Untuk hasil yang lebih baik, coba tambahkan gerbang Hadamard sebelum operasi CNOT."
+                    );
+                } else if (currentTab === 'ml') {
+                    contextResponses.push(
+                        "Model machine learning quantum Anda dapat dioptimalkan dengan menyesuaikan hyperparameter.",
+                        "Coba tingkatkan jumlah epochs untuk mendapatkan akurasi yang lebih baik."
+                    );
+                }
+                
+                return contextResponses[Math.floor(Math.random() * contextResponses.length)];
+            }
+        }
+        
+        // Quantum operations
+        function runQuantumOperation(operation) {
+            const statusMessage = document.getElementById('global-status');
+            const circuitDisplay = document.getElementById('circuit-display');
+            
+            statusMessage.textContent = `Menjalankan ${operation}...`;
+            operationsCount++;
+            document.getElementById('ops-count').textContent = 128 + Math.floor(Math.random() * 20);
+            
+            // Add to quantum circuit
+            quantumCircuit.push(operation);
+            
+            // Update circuit display
+            updateCircuitDisplay(operation);
+            
+            // Update visualization
+            updateVisualization();
+            
+            switch(operation) {
+                case 'entangle':
+                    document.getElementById('quantum-state').textContent = '|Φ⁺⟩';
+                    break;
+                case 'superposition':
+                case 'h-gate':
+                    document.getElementById('quantum-state').textContent = '|+⟩';
+                    break;
+                case 'cnot':
+                    document.getElementById('quantum-state').textContent = '|Φ⁺⟩';
+                    break;
+                case 'x-gate':
+                    document.getElementById('quantum-state').textContent = '|1⟩';
+                    break;
+                case 'measure':
+                    // Collapse to definite state
+                    document.getElementById('quantum-state').textContent = Math.random() > 0.5 ? '|0⟩' : '|1⟩';
+                    break;
+            }
+            
+            // Update energy level
+            updateEnergyLevel();
+            
+            // Reset after delay
+            setTimeout(() => {
+                statusMessage.textContent = 'Operasi berhasil diselesaikan';
+                setTimeout(() => {
+                    statusMessage.textContent = 'Sistem siap';
+                }, 2000);
+            }, 1500);
+        }
+        
+        function updateCircuitDisplay(operation) {
+            const circuitDisplay = document.getElementById('circuit-display');
+            const qubitLines = circuitDisplay.querySelectorAll('.qubit-line');
+            
+            // Add gate to circuit display
+            let gateSymbol = '';
+            switch(operation) {
+                case 'h-gate': gateSymbol = 'H'; break;
+                case 'x-gate': gateSymbol = 'X'; break;
+                case 'cnot': gateSymbol = '⊕'; break;
+                case 'entangle': gateSymbol = 'E'; break;
+                case 'superposition': gateSymbol = 'S'; break;
+                case 'measure': gateSymbol = 'M'; break;
+                default: gateSymbol = 'G';
+            }
+            
+            // For simplicity, add to first qubit line
+            if (qubitLines.length > 0) {
+                const firstQubit = qubitLines[0];
+                const span = firstQubit.querySelector('span');
+                span.textContent += `───${gateSymbol}───`;
+            }
+        }
+        
+        function runQuantumCircuit() {
+            const statusMessage = document.getElementById('global-status');
+            statusMessage.textContent = 'Menjalankan sirkuit quantum...';
+            operationsCount++;
+            
+            // Simulate computation delay
+            setTimeout(() => {
+                const success = Math.random() > 0.1; // 90% success rate
+                
+                if (success) {
+                    statusMessage.textContent = 'Sirkuit quantum berhasil dieksekusi';
+                    
+                    // Add to chat as notification
+                    const chatMessages = document.getElementById('chat-messages');
+                    const message = document.createElement('div');
+                    message.className = 'message ai';
+                    message.textContent = 'Eksekusi sirkuit quantum selesai dengan 1024 shots. Hasil tersedia untuk analisis.';
+                    chatMessages.appendChild(message);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    
+                    // Show results in visualization area
+                    updateVisualization();
+                } else {
+                    statusMessage.textContent = 'Error: Dekoherensi quantum terdeteksi';
+                    
+                    // Add error to chat
+                    const chatMessages = document.getElementById('chat-messages');
+                    const message = document.createElement('div');
+                    message.className = 'message ai';
+                    message.textContent = 'Sirkuit quantum mengalami dekoherensi. Coba kurangi jumlah operasi atau reset sirkuit.';
+                    chatMessages.appendChild(message);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+                
+                setTimeout(() => {
+                    statusMessage.textContent = 'Sistem siap';
+                }, 3000);
+            }, 2000);
+        }
+        
+        function resetVisualization() {
+            // Reset circuit display
+            const circuitDisplay = document.getElementById('circuit-display');
+            circuitDisplay.innerHTML = `
+                <div class="qubit-line">
+                    <div class="qubit-circle">0</div>
+                    <span>|0⟩ ───</span>
+                </div>
+                <div class="qubit-line">
+                    <div class="qubit-circle">1</div>
+                    <span>|0⟩ ───</span>
+                </div>
+            `;
+            
+            // Reset quantum state
+            document.getElementById('quantum-state').textContent = '|0⟩';
+            quantumCircuit = [];
+            currentState = 'zero';
+            
+            // Update visualization
+            updateVisualization();
+            
+            // Update status
+            document.getElementById('global-status').textContent = 'Sirkuit direset';
+            setTimeout(() => {
+                document.getElementById('global-status').textContent = 'Sistem siap';
+            }, 2000);
+        }
+        
+        function addQubit() {
+            if (qubits < SUNDALANG_CONFIG.quantum.maxQubits) {
+                qubits++;
+                document.getElementById('qubit-count').textContent = qubits;
+                document.getElementById('system-qubit-count').textContent = qubits;
+                
+                // Add to circuit display
+                const circuitDisplay = document.getElementById('circuit-display');
+                const newQubit = document.createElement('div');
+                newQubit.className = 'qubit-line';
+                newQubit.innerHTML = `
+                    <div class="qubit-circle">${qubits-1}</div>
+                    <span>|0⟩ ───</span>
+                `;
+                circuitDisplay.appendChild(newQubit);
+                
+                document.getElementById('global-status').textContent = `Qubit ${qubits-1} ditambahkan`;
+                setTimeout(() => {
+                    document.getElementById('global-status').textContent = 'Sistem siap';
+                }, 2000);
+            } else {
+                document.getElementById('global-status').textContent = 'Batas maksimum qubit tercapai';
+                setTimeout(() => {
+                    document.getElementById('global-status').textContent = 'Sistem siap';
+                }, 2000);
+            }
+        }
+        
+        function resetQubits() {
+            qubits = 2;
+            document.getElementById('qubit-count').textContent = qubits;
+            document.getElementById('system-qubit-count').textContent = qubits;
+            
+            // Reset circuit display
+            const circuitDisplay = document.getElementById('circuit-display');
+            circuitDisplay.innerHTML = `
+                <div class="qubit-line">
+                    <div class="qubit-circle">0</div>
+                    <span>|0⟩ ───</span>
+                </div>
+                <div class='qubit-line'>
+                    <div class="qubit-circle">1</div>
+                    <span>|0⟩ ───</span>
+                </div>
+            `;
+            
+            // Reset quantum state
+            document.getElementById('quantum-state').textContent = '|0⟩';
+            quantumCircuit = [];
+            currentState = 'zero';
+            
+            // Update visualization
+            updateVisualization();
+            
+            document.getElementById('global-status').textContent = 'Semua qubit direset';
+            setTimeout(() => {
+                document.getElementById('global-status').textContent = 'Sistem siap';
+            }, 2000);
+        }
+        
+        // Enhanced AI Bridge functions
+        function optimizeCircuit() {
+            document.getElementById('global-status').textContent = 'Mengoptimasi sirkuit quantum...';
+            
+            // Simulate optimization
+            setTimeout(() => {
+                const improvement = Math.floor(Math.random() * 40) + 10;
+                document.getElementById('ai-suggestions').style.display = 'block';
+                document.getElementById('suggestion-text').textContent = 
+                    `Sirkuit dioptimasi! Peningkatan performa: ${improvement}%. Coba jalankan kembali sirkuit.`;
+                
+                document.getElementById('global-status').textContent = 'Sirkuit dioptimasi';
+            }, 2000);
+        }
+        
+        function suggestImprovements() {
+            document.getElementById('global-status').textContent = 'Menganalisis sirkuit untuk perbaikan...';
+            
+            // Simulate analysis
+            setTimeout(() => {
+                const suggestions = [
+                    "Tambahkan gerbang Hadamard pada qubit 0 untuk membuat superposisi.",
+                    "Gunakan gerbang CNOT untuk membuat belitan antara qubit 0 dan 1.",
+                    "Pertimbangkan untuk mengurangi jumlah gerbang untuk meminimalkan dekoherensi."
+                ];
+                
+                document.getElementById('ai-suggestions').style.display = 'block';
+                document.getElementById('suggestion-text').textContent = 
+                    suggestions[Math.floor(Math.random() * suggestions.length)];
+                
+                document.getElementById('global-status').textContent = 'Saran perbaikan tersedia';
+            }, 2000);
+        }
+        
+        function explainConcept() {
+            const concepts = [
+                "Superposisi memungkinkan qubit berada dalam multiple state secara bersamaan.",
+                "Belitan quantum menghubungkan qubit sehingga perubahan pada satu qubit mempengaruhi yang lain.",
+                "Gerbang Hadamard menciptakan superposisi dari state dasar.",
+                "Dekoherensi adalah tantangan utama dalam komputasi quantum yang membatasi waktu komputasi."
+            ];
+            
+            document.getElementById('ai-suggestions').style.display = 'block';
+            document.getElementById('suggestion-text').textContent = 
+                concepts[Math.floor(Math.random() * concepts.length)];
+        }
+        
+        // Visualization functions
+        function initVisualization() {
+            // Initialize Bloch sphere
+            const blochCanvas = document.getElementById('bloch-canvas');
+            const ctx = blochCanvas.getContext('2d');
+            
+            // Set canvas size
+            blochCanvas.width = blochCanvas.offsetWidth;
+            blochCanvas.height = blochCanvas.offsetHeight;
+            
+            // Draw initial Bloch sphere
+            drawBlochSphere(ctx, currentState);
+            
+            // Initialize circuit visualization
+            const circuitCanvas = document.getElementById('circuit-canvas');
+            const circuitCtx = circuitCanvas.getContext('2d');
+            
+            circuitCanvas.width = circuitCanvas.offsetWidth;
+            circuitCanvas.height = circuitCanvas.offsetHeight;
+            
+            drawCircuit(circuitCtx);
+        }
+        
+        function updateVisualization() {
+            const blochCanvas = document.getElementById('bloch-canvas');
+            const ctx = blochCanvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, blochCanvas.width, blochCanvas.height);
+            
+            // Draw updated Bloch sphere
+            drawBlochSphere(ctx, currentState);
+            
+            // Update circuit visualization
+            const circuitCanvas = document.getElementById('circuit-canvas');
+            const circuitCtx = circuitCanvas.getContext('2d');
+            
+            circuitCtx.clearRect(0, 0, circuitCanvas.width, circuitCanvas.height);
+            drawCircuit(circuitCtx);
+        }
+        
+        function drawBlochSphere(ctx, state) {
+            const width = ctx.canvas.width;
+            const height = ctx.canvas.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) * 0.4;
+            
+            // Draw sphere
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(0, 255, 204, 0.5)';
+            ctx.stroke();
+            
+            // Draw axes
+            ctx.beginPath();
+            ctx.moveTo(centerX - radius, centerY);
+            ctx.lineTo(centerX + radius, centerY);
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - radius);
+            ctx.lineTo(centerX, centerY + radius);
+            ctx.strokeStyle = 'rgba(0, 255, 0, 0.5)';
+            ctx.stroke();
+            
+            // Draw state vector based on current state
+            ctx.beginPath();
+            let endX, endY;
+            
+            switch(state) {
+                case 'zero':
+                    endX = centerX;
+                    endY = centerY - radius;
+                    break;
+                case 'one':
+                    endX = centerX;
+                    endY = centerY + radius;
+                    break;
+                case 'plus':
+                    endX = centerX + radius;
+                    endY = centerY;
+                    break;
+                case 'minus':
+                    endX = centerX - radius;
+                    endY = centerY;
+                    break;
+                default:
+                    endX = centerX;
+                    endY = centerY - radius;
+            }
+            
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(endX, endY);
+            ctx.strokeStyle = '#ff00ff';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Draw point
+            ctx.beginPath();
+            ctx.arc(endX, endY, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff00ff';
+            ctx.fill();
+        }
+        
+        function drawCircuit(ctx) {
+            const width = ctx.canvas.width;
+            const height = ctx.canvas.height;
+            const qubitCount = qubits;
+            const gateCount = quantumCircuit.length;
+            
+            // Draw qubit lines
+            const lineSpacing = height / (qubitCount + 1);
+            
+            for (let i = 0; i < qubitCount; i++) {
+                const y = (i + 1) * lineSpacing;
+                
+                ctx.beginPath();
+                ctx.moveTo(50, y);
+                ctx.lineTo(width - 50, y);
+                ctx.strokeStyle = 'rgba(0, 255, 204, 0.5)';
+                ctx.stroke();
+                
+                // Draw qubit label
+                ctx.fillStyle = 'white';
+                ctx.font = '14px Arial';
+                ctx.fillText(`Qubit ${i}`, 10, y + 5);
+            }
+            
+            // Draw gates
+            const gateWidth = 30;
+            const gateSpacing = (width - 100) / (gateCount + 1);
+            
+            quantumCircuit.forEach((gate, index) => {
+                const x = 50 + (index + 1) * gateSpacing;
+                const y = lineSpacing; // For simplicity, put all gates on first qubit
+                
+                ctx.beginPath();
+                ctx.rect(x - gateWidth/2, y - gateWidth/2, gateWidth, gateWidth);
+                ctx.fillStyle = 'rgba(0, 102, 255, 0.3)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(0, 180, 255, 0.8)';
+                ctx.stroke();
+                
+                // Draw gate symbol
+                ctx.fillStyle = 'white';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                let symbol;
+                switch(gate) {
+                    case 'h-gate': symbol = 'H'; break;
+                    case 'x-gate': symbol = 'X'; break;
+                    case 'cnot': symbol = '⊕'; break;
+                    case 'entangle': symbol = 'E'; break;
+                    case 'superposition': symbol = 'S'; break;
+                    case 'measure': symbol = 'M'; break;
+                    default: symbol = 'G';
+                }
+                
+                ctx.fillText(symbol, x, y);
+            });
+        }
+        
+        function visualizeState(state) {
+            currentState = state;
+            updateVisualization();
+            
+            let stateName;
+            switch(state) {
+                case 'zero': stateName = '|0⟩'; break;
+                case 'one': stateName = '|1⟩'; break;
+                case 'plus': stateName = '|+⟩'; break;
+                case 'minus': stateName = '|-⟩'; break;
+            }
+            
+            document.getElementById('global-status').textContent = `Visualisasi state ${stateName} ditampilkan`;
+        }
+        
+        function startAnimation() {
+            document.getElementById('global-status').textContent = 'Memulai animasi state quantum...';
+            
+            const states = ['zero', 'one', 'plus', 'minus'];
+            let index = 0;
+            
+            const interval = setInterval(() => {
+                visualizeState(states[index]);
+                index = (index + 1) % states.length;
+            }, 2000);
+            
+            // Stop after 10 seconds
+            setTimeout(() => {
+                clearInterval(interval);
+                document.getElementById('global-status').textContent = 'Animasi selesai';
+            }, 10000);
+        }
+        
+        function exportVisualization() {
+            const canvas = document.getElementById('bloch-canvas');
+            const dataURL = canvas.toDataURL('image/png');
+            
+            const a = document.createElement('a');
+            a.href = dataURL;
+            a.download = 'quantum-visualization.png';
+            a.click();
+            
+            document.getElementById('global-status').textContent = 'Visualisasi diekspor';
+        }
+        
+        // Machine Learning functions
+        function initCharts() {
+            // Training chart
+            const trainingCtx = document.getElementById('training-chart').getContext('2d');
+            trainingChart = new Chart(trainingCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Akurasi',
+                            data: [],
+                            borderColor: '#00ffcc',
+                            tension: 0.1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Loss',
+                            data: [],
+                            borderColor: '#ff00ff',
+                            tension: 0.1,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Akurasi (%)'
+                            },
+                            min: 0,
+                            max: 100
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Loss'
+                            },
+                            min: 0,
+                            max: 1,
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Evaluation chart
+            const evaluationCtx = document.getElementById('evaluation-chart').getContext('2d');
+            evaluationChart = new Chart(evaluationCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Precision', 'Recall', 'F1-Score', 'Akurasi'],
+                    datasets: [{
+                        label: 'Metrik Evaluasi',
+                        data: [0, 0, 0, 0],
+                        backgroundColor: [
+                            'rgba(0, 102, 255, 0.7)',
+                            'rgba(0, 255, 204, 0.7)',
+                            'rgba(255, 0, 255, 0.7)',
+                            'rgba(255, 255, 255, 0.7)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1
+                        }
+                    }
+                }
+            });
+            
+            // Performance chart
+            const performanceCtx = document.getElementById('performance-chart').getContext('2d');
+            performanceChart = new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Kinerja Sistem',
+                        data: [],
+                        borderColor: '#00ffcc',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // Data chart
+            const dataCtx = document.getElementById('data-chart').getContext('2d');
+            dataChart = new Chart(dataCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Distribusi Data',
+                        data: [],
+                        backgroundColor: 'rgba(0, 102, 255, 0.7)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        function runNeuralNetwork() {
+            document.getElementById('global-status').textContent = 'Menjalankan neural network quantum...';
+            
+            // Reset chart
+            trainingChart.data.labels = [];
+            trainingChart.data.datasets[0].data = [];
+            trainingChart.data.datasets[1].data = [];
+            trainingChart.update();
+            
+            // Simulate training process
+            const resultsDiv = document.getElementById('training-results');
+            resultsDiv.innerHTML = '<p>Training in progress... Epoch 1/50</p>';
+            
+            let epoch = 0;
+            const startTime = Date.now();
+            const interval = setInterval(() => {
+                epoch++;
+                
+                // Update chart
+                const accuracy = Math.min(100, 10 + epoch * 1.8 + Math.random() * 3);
+                const loss = Math.max(0.1, 1 - epoch * 0.02 + Math.random() * 0.1);
+                
+                trainingChart.data.labels.push(`Epoch ${epoch}`);
+                trainingChart.data.datasets[0].data.push(accuracy);
+                trainingChart.data.datasets[1].data.push(loss);
+                trainingChart.update();
+                
+                // Update metrics
+                document.getElementById('accuracy').textContent = `${accuracy.toFixed(2)}%`;
+                document.getElementById('loss').textContent = loss.toFixed(4);
+                document.getElementById('epoch').textContent = `${epoch}/50`;
+                
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('training-time').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (epoch >= 50) {
+                    clearInterval(interval);
+                    resultsDiv.innerHTML = '<p>Training complete! Final accuracy: 92.4%</p>';
+                    document.getElementById('global-status').textContent = 'Training neural network selesai';
+                    
+                    // Update evaluation chart
+                    evaluationChart.data.datasets[0].data = [
+                        0.85 + Math.random() * 0.1,
+                        0.87 + Math.random() * 0.1,
+                        0.86 + Math.random() * 0.1,
+                        0.92 + Math.random() * 0.05
+                    ];
+                    evaluationChart.update();
+                }
+            }, 200);
+        }
+        
+        function trainModel() {
+            runNeuralNetwork();
+        }
+        
+        function evaluateModel() {
+            document.getElementById('global-status').textContent = 'Mengevaluasi model...';
+            
+            // Simulate evaluation
+            setTimeout(() => {
+                evaluationChart.data.datasets[0].data = [
+                    0.85 + Math.random() * 0.1,
+                    0.87 + Math.random() * 0.1,
+                    0.86 + Math.random() * 0.1,
+                    0.92 + Math.random() * 0.05
+                ];
+                evaluationChart.update();
+                
+                document.getElementById('global-status').textContent = 'Evaluasi model selesai';
+            }, 1500);
+        }
+        
+        function exportModel() {
+            document.getElementById('global-status').textContent = 'Mengekspor model...';
+            
+            // Simulate export
+            setTimeout(() => {
+                const a = document.createElement('a');
+                a.href = 'data:text/plain;charset=utf-8,Model quantum exported at ' + new Date().toLocaleString();
+                a.download = 'quantum-model.json';
+                a.click();
+                
+                document.getElementById('global-status').textContent = 'Model diekspor';
+            }, 1000);
+        }
+        
+        // Data Management functions
+        function handleFileUpload(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                document.getElementById('active-file').textContent = file.name;
+                document.getElementById('global-status').textContent = `File ${file.name} dipilih`;
+                
+                // Simulate file analysis
+                setTimeout(() => {
+                    const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                    document.getElementById('storage-size').textContent = `${fileSize} MB`;
+                    
+                    // Update data chart with random data
+                    dataChart.data.labels = ['Kelas 0', 'Kelas 1', 'Kelas 2', 'Kelas 3', 'Kelas 4'];
+                    dataChart.data.datasets[0].data = [
+                        Math.floor(Math.random() * 100),
+                        Math.floor(Math.random() * 100),
+                        Math.floor(Math.random() * 100),
+                        Math.floor(Math.random() * 100),
+                        Math.floor(Math.random() * 100)
+                    ];
+                    dataChart.update();
+                    
+                    document.getElementById('global-status').textContent = `File ${file.name} dianalisis`;
+                }, 1000);
+            }
+        }
+        
+        function analyzeQuantumData() {
+            document.getElementById('global-status').textContent = 'Menganalisis data quantum...';
+            
+            // Simulate analysis
+            setTimeout(() => {
+                // Update data chart with new random data
+                dataChart.data.labels = ['|0⟩', '|1⟩', '|+⟩', '|-⟩', '|i⟩'];
+                dataChart.data.datasets[0].data = [
+                    Math.floor(Math.random() * 100),
+                    Math.floor(Math.random() * 100),
+                    Math.floor(Math.random() * 100),
+                    Math.floor(Math.random() * 100),
+                    Math.floor(Math.random() * 100)
+                ];
+                dataChart.update();
+                
+                document.getElementById('global-status').textContent = 'Analisis data selesai';
+            }, 2000);
+        }
+        
+        function saveToQuantumStorage() {
+            const activeFile = document.getElementById('active-file').textContent;
+            
+            if (activeFile === 'Tidak ada') {
+                document.getElementById('global-status').textContent = 'Tidak ada file untuk disimpan';
+                return;
+            }
+            
+            document.getElementById('global-status').textContent = 'Menyimpan ke quantum storage...';
+            
+            // Simulate save operation
+            setTimeout(() => {
+                // Add to file list
+                const fileSize = (Math.random() * 5 + 0.1).toFixed(2);
+                SUNDALANG_CONFIG.storage.fileList.push({
+                    name: activeFile,
+                    size: fileSize,
+                    date: new Date().toLocaleString()
+                });
+                
+                // Update UI
+                refreshFileList();
+                document.getElementById('dataset-count').textContent = SUNDALANG_CONFIG.storage.fileList.length;
+                
+                document.getElementById('global-status').textContent = `File ${activeFile} disimpan ke storage`;
+            }, 1500);
+        }
+        
+        function loadFromQuantumStorage() {
+            document.getElementById('global-status').textContent = 'Memuat dari quantum storage...';
+            
+            // Simulate load operation
+            setTimeout(() => {
+                if (SUNDALANG_CONFIG.storage.fileList.length > 0) {
+                    const file = SUNDALANG_CONFIG.storage.fileList[0];
+                    document.getElementById('active-file').textContent = file.name;
+                    document.getElementById('storage-size').textContent = `${file.size} MB`;
+                    
+                    document.getElementById('global-status').textContent = `File ${file.name} dimuat dari storage`;
+                } else {
+                    document.getElementById('global-status').textContent = 'Tidak ada file dalam storage';
+                }
+            }, 1500);
+        }
+        
+        function refreshFileList() {
+            const fileList = document.getElementById('file-list');
+            fileList.innerHTML = '';
+            
+            if (SUNDALANG_CONFIG.storage.fileList.length === 0) {
+                fileList.innerHTML = '<p>Tidak ada file dalam storage</p>';
+                return;
+            }
+            
+            SUNDALANG_CONFIG.storage.fileList.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div>
+                        <strong>${file.name}</strong>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">
+                            ${file.size} MB - ${file.date}
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="file-action-btn" onclick="loadFile(${index})">
+                            <i class="fas fa-folder-open"></i>
+                        </button>
+                        <button class="file-action-btn" onclick="deleteFile(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                fileList.appendChild(fileItem);
+            });
+        }
+        
+        function loadFile(index) {
+            const file = SUNDALANG_CONFIG.storage.fileList[index];
+            document.getElementById('active-file').textContent = file.name;
+            document.getElementById('storage-size').textContent = `${file.size} MB`;
+            
+            document.getElementById('global-status').textContent = `File ${file.name} dimuat`;
+        }
+        
+        function deleteFile(index) {
+            const file = SUNDALANG_CONFIG.storage.fileList[index];
+            SUNDALANG_CONFIG.storage.fileList.splice(index, 1);
+            
+            refreshFileList();
+            document.getElementById('dataset-count').textContent = SUNDALANG_CONFIG.storage.fileList.length;
+            
+            document.getElementById('global-status').textContent = `File ${file.name} dihapus`;
+        }
+        
+        function createNewDataset() {
+            const datasetName = `dataset_${SUNDALANG_CONFIG.storage.fileList.length + 1}.qdata`;
+            const fileSize = (Math.random() * 5 + 0.1).toFixed(2);
+            
+            SUNDALANG_CONFIG.storage.fileList.push({
+                name: datasetName,
+                size: fileSize,
+                date: new Date().toLocaleString()
+            });
+            
+            refreshFileList();
+            document.getElementById('dataset-count').textContent = SUNDALANG_CONFIG.storage.fileList.length;
+            
+            document.getElementById('global-status').textContent = `Dataset ${datasetName} dibuat`;
+        }
+        
+        function visualizeData() {
+            document.getElementById('global-status').textContent = 'Membuat visualisasi data...';
+            
+            // Simulate visualization
+            setTimeout(() => {
+                // Update data chart with new random data
+                dataChart.data.labels = ['Set 1', 'Set 2', 'Set 3', 'Set 4', 'Set 5'];
+                dataChart.data.datasets[0].data = [
+                    Math.floor(Math.random() * 100),
+                    Math.floor(Math.random() * 100),
+                    Math.floor(Math.random() * 100),
+                    Math.floor(Math.random() * 100),
+                    Math.floor(Math.random() * 100)
+                ];
+                dataChart.update();
+                
+                document.getElementById('global-status').textContent = 'Visualisasi data selesai';
+            }, 1000);
+        }
+        
+        function exportData() {
+            document.getElementById('global-status').textContent = 'Mengekspor data...';
+            
+            // Simulate export
+            setTimeout(() => {
+                const a = document.createElement('a');
+                a.href = 'data:text/plain;charset=utf-8,Data quantum exported at ' + new Date().toLocaleString();
+                a.download = 'quantum-data.json';
+                a.click();
+                
+                document.getElementById('global-status').textContent = 'Data diekspor';
+            }, 1000);
+        }
+        
+        function clearStorage() {
+            SUNDALANG_CONFIG.storage.fileList = [];
+            refreshFileList();
+            document.getElementById('dataset-count').textContent = '0';
+            document.getElementById('storage-size').textContent = '0 MB';
+            document.getElementById('active-file').textContent = 'Tidak ada';
+            
+            document.getElementById('global-status').textContent = 'Storage dibersihkan';
+        }
+        
+        // System status
+        function updateSystemStatus() {
+            // Update operations count
+            document.getElementById('op-count').textContent = operationsCount;
+            
+            // Update uptime
+            const elapsed = Date.now() - startTime;
+            const seconds = Math.floor(elapsed / 1000) % 60;
+            const minutes = Math.floor(elapsed / (1000 * 60)) % 60;
+            const hours = Math.floor(elapsed / (1000 * 60 * 60));
+            
+            document.getElementById('uptime').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+            // Update memory usage
+            if (performance && performance.memory) {
+                const usedMB = (performance.memory.usedJSHeapSize / 1048576).toFixed(2);
+                const totalMB = (performance.memory.totalJSHeapSize / 1048576).toFixed(2);
+                document.getElementById('memory-usage').textContent = `${usedMB}MB / ${totalMB}MB`;
+            }
+            
+            // Update system load
+            const load = Math.floor(Math.random() * 30) + 5;
+            document.getElementById('system-load').textContent = `${load}%`;
+            
+            // Update global status
+            const statuses = ['Sistem Siap', 'Memproses', 'Optimal', 'Stabil', 'Efisien'];
+            const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+            document.getElementById('global-status').textContent = randomStatus;
+            
+            // Update TensorFlow.js status
+            if (typeof tf !== 'undefined') {
+                document.getElementById('tf-status').textContent = 'Loaded ✅';
+                document.getElementById('core-status').textContent = 'Active ✅';
+                document.getElementById('ai-status').textContent = 'Active ✅';
+            } else {
+                document.getElementById('tf-status').textContent = 'Not Available ❌';
+            }
+            
+            // Check GPU acceleration
+            if (navigator.gpu) {
+                document.getElementById('gpu-status').textContent = 'Available ✅';
+            } else {
+                document.getElementById('gpu-status').textContent = 'Not Available ❌';
+            }
+            
+            // Check WebAssembly
+            if (typeof WebAssembly !== 'undefined') {
+                document.getElementById('wasm-status').textContent = 'Available ✅';
+            } else {
+                document.getElementById('wasm-status').textContent = 'Not Available ❌';
+            }
+            
+            // Update performance chart
+            performanceChart.data.labels.push(new Date().toLocaleTimeString());
+            performanceChart.data.datasets[0].data.push(100 - load);
+            
+            // Keep only last 10 data points
+            if (performanceChart.data.labels.length > 10) {
+                performanceChart.data.labels.shift();
+                performanceChart.data.datasets[0].data.shift();
+            }
+            
+            performanceChart.update();
+            
+            // Update metrics periodically
+            setTimeout(updateSystemStatus, 2000);
+        }
+        
+        function updateEnergyLevel() {
+            const energyElement = document.getElementById('energy-level');
+            const newEnergy = Math.max(20, Math.min(95, Math.random() * 100));
+            energyElement.textContent = `${newEnergy.toFixed(0)}%`;
+        }
+        
+        // TensorFlow.js initialization
+        async function initTensorFlow() {
+            try {
+                // Check if TensorFlow.js is available
+                if (typeof tf !== 'undefined') {
+                    console.log('TensorFlow.js loaded successfully');
+                    // You can add TensorFlow.js operations here
+                }
+            } catch (error) {
+                console.error('Error initializing TensorFlow.js:', error);
+            }
+        }
+        
+        // Additional functions for other tabs
+        function insertSuggestion(suggestion) {
+            document.getElementById('input-instruction').value = suggestion;
+        }
+        
+        function generateCode() {
+            const instruction = document.getElementById('input-instruction').value;
+            const codeOutput = document.getElementById('code-output');
+            
+            if (instruction.trim() === '') {
+                codeOutput.textContent = '// Silakan masukkan instruksi terlebih dahulu';
+                return;
+            }
+            
+            // Simple code generation based on instruction
+            let generatedCode = '// Kode SundaLang hasil generate\n';
+            generatedCode += '// Berdasarkan instruksi: ' + instruction + '\n\n';
+            
+            if (instruction.includes('Hadamard') || instruction.includes('hadamard')) {
+                generatedCode += '📦 use core::quantum\n\n';
+                generatedCode += 'fn main() -> Unit {\n';
+                generatedCode += '    // Inisialisasi qubit\n';
+                generatedCode += '    📝 let qubit0 = quantum::create_qubit()\n';
+                generatedCode += '    📝 let qubit1 = quantum::create_qubit()\n\n';
+                generatedCode += '    // Apply Hadamard gate\n';
+                generatedCode += '    ⚛️ quantum::apply_gate(qubit0, "H")\n\n';
+                
+                if (instruction.includes('CNOT') || instruction.includes('cnot')) {
+                    generatedCode += '    // Apply CNOT gate\n';
+                    generatedCode += '    ⚛️ quantum::apply_cnot(qubit0, qubit1)\n\n';
+                }
+                
+                generatedCode += '    // Jalankan quantum circuit\n';
+                generatedCode += '    🚀 let result = quantum::execute()\n\n';
+                generatedCode += '    // Tampilkan hasil\n';
+                generatedCode += '    🔎 quantum::print_result(result)\n';
+                generatedCode += '}';
+            } else {
+                generatedCode += '📦 use core::quantum\n\n';
+                generatedCode += 'fn main() -> Unit {\n';
+                generatedCode += '    // Implementasi sirkuit quantum Anda di sini\n';
+                generatedCode += '    // Berdasarkan instruksi: ' + instruction + '\n';
+                generatedCode += '    🔎 print("Hello Quantum World!")\n';
+                generatedCode += '}';
+            }
+            
+            codeOutput.textContent = generatedCode;
+        }
+        
+        function copyCode() {
+            const code = document.getElementById('code-output').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                document.getElementById('global-status').textContent = 'Kode berhasil disalin ke clipboard';
+            });
+        }
+        
+        function downloadCode() {
+            const code = document.getElementById('code-output').textContent;
+            const blob = new Blob([code], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sundalang_code.su';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+            document.getElementById('global-status').textContent = 'File berhasil didownload';
+        }
+        
+        function runCode() {
+            document.getElementById('global-status').textContent = 'Menjalankan kode quantum... (Simulasi)';
+            
+            // Simulate execution
+            setTimeout(() => {
+                const success = Math.random() > 0.2;
+                if (success) {
+                    document.getElementById('global-status').textContent = 'Berhasil: Quantum circuit dieksekusi dengan sukses';
+                } else {
+                    document.getElementById('global-status').textContent = 'Error: Quantum decoherence terdeteksi. Coba lagi.';
+                }
+            }, 2000);
+        }
+        
+        function visualizeCircuit() {
+            document.getElementById('global-status').textContent = 'Generating circuit visualization...';
+            
+            // Simulate visualization
+            setTimeout(() => {
+                document.getElementById('global-status').textContent = 'Visualisasi sirkuit ditampilkan';
+                
+                // Switch to visualization tab
+                const menuItems = document.querySelectorAll('.menu-item');
+                menuItems.forEach(i => i.classList.remove('active'));
+                document.querySelector('.menu-item[data-tab="visualization"]').classList.add('active');
+                showTab('visualization');
+            }, 1000);
+        }
+        
+        // System control functions
+        function optimizePerformance() {
+            document.getElementById('global-status').textContent = 'Mengoptimasi kinerja sistem...';
+            
+            setTimeout(() => {
+                document.getElementById('global-status').textContent = 'Kinerja sistem dioptimasi';
+            }, 1500);
+        }
+        
+        function clearCache() {
+            document.getElementById('global-status').textContent = 'Membersihkan cache...';
+            
+            setTimeout(() => {
+                document.getElementById('global-status').textContent = 'Cache dibersihkan';
+            }, 1000);
+        }
+        
+        function restartSystem() {
+            document.getElementById('global-status').textContent = 'Merestart sistem...';
+            
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+        
+        // Visual effects
+        function createParticles() {
+            const container = document.createElement('div');
+            container.style.position = 'fixed';
+            container.style.top = '0';
+            container.style.left = '0';
+            container.style.width = '100%';
+            container.style.height = '100%';
+            container.style.pointerEvents = 'none';
+            container.style.zIndex = '-1';
+            document.body.appendChild(container);
+            
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'absolute';
+                particle.style.width = '4px';
+                particle.style.height = '4px';
+                particle.style.background = 'var(--cosmic-accent)';
+                particle.style.borderRadius = '50%';
+                particle.style.boxShadow = '0 0 10px var(--cosmic-accent)';
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.opacity = '0.7';
+                
+                container.appendChild(particle);
+                
+                // Animate particle
+                animateParticle(particle);
+            }
+        }
+        
+        function animateParticle(particle) {
+            const keyframes = [
+                { transform: 'translateY(0) rotate(0deg)', opacity: 0.7 },
+                { transform: `translateY(${Math.random() * 100 - 50}px) translateX(${Math.random() * 100 - 50}px) rotate(${Math.random() * 360}deg)`, opacity: 0.3 },
+                { transform: 'translateY(0) rotate(0deg)', opacity: 0.7 }
+            ];
+            
+            const options = {
+                duration: 3000 + Math.random() * 4000,
+                iterations: Infinity
+            };
+            
+            particle.animate(keyframes, options);
+        }
+        
+        // Android App Conversion
+        function convertToAndroidApp() {
+            document.getElementById('global-status').textContent = 'Mempersiapkan konversi ke aplikasi Android...';
+            
+            // This would typically involve:
+            // 1. Adding Capacitor or Cordova
+            // 2. Configuring Android manifest
+            // 3. Building the APK
+            
+            setTimeout(() => {
+                document.getElementById('global-status').textContent = 'Aplikasi Android siap dibangun!';
+                
+                // Show Android conversion panel
+                const androidPanel = document.createElement('div');
+                androidPanel.style.position = 'fixed';
+                androidPanel.style.top = '50%';
+                androidPanel.style.left = '50%';
+                androidPanel.style.transform = 'translate(-50%, -50%)';
+                androidPanel.style.background = 'var(--cosmic-card)';
+                androidPanel.style.border = '1px solid var(--cosmic-border)';
+                androidPanel.style.borderRadius = '15px';
+                androidPanel.style.padding = '20px';
+                androidPanel.style.zIndex = '1001';
+                androidPanel.style.width = '80%';
+                androidPanel.style.maxWidth = '500px';
+                
+                androidPanel.innerHTML = `
+                    <h2 style="color: var(--cosmic-secondary); margin-bottom: 15px;">Konversi ke Aplikasi Android</h2>
+                    <p>Aplikasi siap dikonversi ke Android. Berikut langkah-langkahnya:</p>
+                    <ol style="margin: 15px 0; padding-left: 20px;">
+                        <li>Install Capacitor: <code>npm install @capacitor/core @capacitor/cli</code></li>
+                        <li>Init Capacitor: <code>npx cap init</code></li>
+                        <li>Add Android platform: <code>npx cap add android</code></li>
+                        <li>Build aplikasi: <code>npx cap open android</code></li>
+                    </ol>
+                    <button class="btn" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i> Tutup
+                    </button>
+                `;
+                
+                document.body.appendChild(androidPanel);
+            }, 2000);
+        }
+        
+        // Add Android conversion button to system tab
+        document.addEventListener('DOMContentLoaded', function() {
+            const systemTab = document.getElementById('system-tab');
+            const androidButton = document.createElement('button');
+            androidButton.className = 'btn android-only';
+            androidButton.innerHTML = '<i class="fab fa-android"></i> Konversi ke Aplikasi Android';
+            androidButton.onclick = convertToAndroidApp;
+            androidButton.style.marginTop = '20px';
+            
+            systemTab.querySelector('.quantum-panel:last-child .control-grid').appendChild(androidButton);
+        });
+    </script>
+</body>
+</html>
